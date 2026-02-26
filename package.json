@@ -1,9 +1,31 @@
 {
   "dependencies": {
     "axios": "^1.13.5",
+    "body-parser": "^2.2.2",
     "dotenv": "^17.3.1",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
+    "nodemon": "^3.1.14",
     "pg": "^8.19.0"
-  }
+  },
+  "name": "bookcov",
+  "version": "1.0.0",
+  "description": "----------------------",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/savyez/Bookcov.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/savyez/Bookcov/issues"
+  },
+  "homepage": "https://github.com/savyez/Bookcov#readme"
 }
