@@ -2,7 +2,18 @@
 
 
 <body>
-    <h1>Welcome to the BookCov App</h1>
+    <% if (locals.books) { %>
+        <h1>Books List</h1>
+    <% books.forEach(book => { %>
+        <div class="book">
+            <h2><%= book.book_name %></h2>
+            <p>Author: <%= authors.find(a => a.author_id === book.author_id)?.author_name || 'Unknown Author' %></p>
+            <p>Date read: <%= book.date_read %></p>
+        </div>
+        <% }) %>
+    <% } else { %>
+        <p>No books found.</p>
+    <% } %>
 </body>
 
 

@@ -19,9 +19,42 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+const authors = [
+  {
+    author_id: 1,
+    author_name: "George Orwell"
+  },
+  {
+    author_id: 2,
+    author_name: "J.K. Rowling"
+  }
+];
+
+const books = [
+  {
+    book_id: 1,
+    book_name: "1984",
+    author_id: 1,
+    date_read: "2025-12-10",
+    rating: 9,
+    cover_url: "https://example.com/1984.jpg"
+  },
+  {
+    book_id: 2,
+    book_name: "Harry Potter and the Philosopher's Stone",
+    author_id: 2,
+    date_read: "2026-01-05",
+    rating: 10,
+    cover_url: "https://example.com/hp1.jpg"
+  }
+];
+
 // Home Route
 app.get('/', async (_req, res) => {
-    res.render('index.ejs');
+    res.render('index.ejs', {
+        authors: authors,
+        books: books,
+    });
 });
 
 
