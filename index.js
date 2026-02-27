@@ -31,35 +31,9 @@ db.connect()
     .then(() => console.log('Connected to the database'))
     .catch(err => console.error('Database connection error:', err.stack));
 
-let authors = [
-  {
-    author_id: 1,
-    author_name: "George Orwell"
-  },
-  {
-    author_id: 2,
-    author_name: "J.K. Rowling"
-  }
-];
+let authors = [];
 
-let books = [
-  {
-    book_id: 1,
-    book_name: "1984",
-    author_id: 1,
-    date_read: "2025-12-10",
-    rating: 9,
-    cover_url: "https://example.com/1984.jpg"
-  },
-  {
-    book_id: 2,
-    book_name: "Harry Potter and the Philosopher's Stone",
-    author_id: 2,
-    date_read: "2026-01-05",
-    rating: 10,
-    cover_url: "https://example.com/hp1.jpg"
-  }
-];
+let books = [];
 
 
 // Home Route
@@ -72,28 +46,65 @@ app.get('/', async (_req, res) => {
   } catch (err) {
     console.error('Error fetching data from database:', err.stack);
   }
-  if (books.length === 0) {
-    books.push({
-      book_id: 0,
-      book_name: "No books to display",
-      author_id: 0,
-      date_read: null,
-      rating: 0,
-      cover_url: null
-    });
-  }
-  if (authors.length === 0) {
-    authors.push({
-      author_id: 0,
-      author_name: "No authors to display"
-    });
-  }
   res.render('index.ejs', {
       authors: authors,
       books: books,
   });
 });
 
+app.get('/new', async (_req, res) => {
+  try {
+    const authorResult = await db.query("SELECT * FROM authors ORDER BY author_name");
+    res.render('new.ejs', {
+      authors: authorResult.rows
+    });
+  } catch (err) {
+    console.error('Error fetching authors:', err.stack);
+    res.status(500).send('Error loading new book form');
+  }
+});
+
+
+app.post('/new', async (req, res) => {
+  const { book_name, author_name, new_author_name, date_read, rating, cover_url, review } = req.body;
+  const submittedAuthorName = author_name === '__new__' ? new_author_name : author_name;
+  const normalizedAuthorName = submittedAuthorName?.trim();
+
+  if (!normalizedAuthorName) {
+    return res.status(400).send('Author name is required');
+  }
+
+  try {
+    await db.query("BEGIN");
+
+    const existingAuthor = await db.query(
+      "SELECT author_id FROM authors WHERE LOWER(author_name) = LOWER($1) LIMIT 1",
+      [normalizedAuthorName]
+    );
+
+    let resolvedAuthorId = existingAuthor.rows[0]?.author_id;
+
+    if (!resolvedAuthorId) {
+      const newAuthor = await db.query(
+        "INSERT INTO authors (author_name) VALUES ($1) RETURNING author_id",
+        [normalizedAuthorName]
+      );
+      resolvedAuthorId = newAuthor.rows[0].author_id;
+    }
+
+    await db.query(
+      "INSERT INTO books (book_name, author_id, date_read, rating, cover_url, review) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [book_name, resolvedAuthorId, date_read, rating, cover_url || null, review || null]
+    );
+
+    await db.query("COMMIT");
+    res.redirect('/');
+  } catch (err) {
+    await db.query("ROLLBACK");
+    console.error('Error adding book:', err.stack);
+    res.status(500).send('Error adding book');
+  }
+});
 
 
 // Listen to the server
