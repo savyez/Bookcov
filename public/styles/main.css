@@ -1,12 +1,91 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: Georgia, serif;
     background-color: #212222;
+    color: #f1f1f1;
     margin: 0;
     padding: 0;
 }
 
+.book {
+    display: block;
+    unicode-bidi: isolate;
+    margin-bottom: 2.25rem;
+}
+
 img {
+    float: left;
+    width: 110px;
+    height: auto;
+    margin: 0 1.25rem 0.75rem 0;
     border-radius: 5px;
-    height: 30px;
-    width: 20px;
+    object-fit: cover;
+}
+
+.container.my-5 .row > img.col-md-4 {
+    float: left !important;
+    width: 110px !important;
+    max-width: 110px !important;
+    height: auto !important;
+    margin: 0 1.25rem 0.75rem 0 !important;
+}
+
+.container.my-5 .row {
+    display: block;
+}
+
+.container.my-5 .row::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.container.book {
+    max-width: 980px;
+}
+
+.book-title {
+    margin: 0 0 0.45rem;
+    line-height: 1.15;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.book-title-link {
+    color: #9bb8ff;
+    text-decoration: underline;
+    text-underline-offset: 0.08em;
+}
+
+.book-title-link:hover {
+    color: #bfd2ff;
+}
+
+.book small {
+    display: block;
+    color: #a5a5a5;
+    font-size: 1.05rem;
+    letter-spacing: 0.03em;
+    font-variant: small-caps;
+    margin: 0.15rem 0 0.7rem;
+}
+
+.book p {
+    margin: 0;
+    max-width: 66ch;
+    line-height: 1.42;
+    font-size: 1.15rem;
+}
+
+
+.books-divider {
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.877);
+    width: 100%;
+    margin: 0 0 1.7rem;
+}
+
+.books-divider-wrap {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
 }

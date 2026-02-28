@@ -65,6 +65,7 @@ app.get('/new', async (_req, res) => {
 });
 
 
+// Add new book route
 app.post('/new', async (req, res) => {
   const { book_name, author_name, new_author_name, date_read, rating, cover_url, review } = req.body;
   const submittedAuthorName = author_name === '__new__' ? new_author_name : author_name;
@@ -105,6 +106,15 @@ app.post('/new', async (req, res) => {
     res.status(500).send('Error adding book');
   }
 });
+
+
+app.post('/search', async (req, res) => {
+  const searchBook = req.body.search_book.trim();
+  console.log(`Searching for book: ${searchBook}`);
+  const result = await axios.get(process.env.BOOK_SEARCH_URL + `?title=${searchBook}`)
+  console.log('Search result:', result.data);
+});
+
 
 
 // Listen to the server
