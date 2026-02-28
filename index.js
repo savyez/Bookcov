@@ -35,11 +35,13 @@ let authors = [];
 
 let books = [];
 
+let coverUrl = '';
+
 
 // Home Route
 app.get('/', async (_req, res) => {
   try {
-    const authorResult = await db.query("SELECT * FROM authors");
+    const authorResult = await db.query("SELECT * FROM book_authors");
     const bookResult = await db.query("SELECT * FROM books");
     authors = authorResult.rows;
     books = bookResult.rows;
@@ -54,7 +56,7 @@ app.get('/', async (_req, res) => {
 
 app.get('/new', async (_req, res) => {
   try {
-    const authorResult = await db.query("SELECT * FROM authors ORDER BY author_name");
+    const authorResult = await db.query("SELECT * FROM book_authors ORDER BY author_id");
     res.render('new.ejs', {
       authors: authorResult.rows
     });
@@ -67,52 +69,72 @@ app.get('/new', async (_req, res) => {
 
 // Add new book route
 app.post('/new', async (req, res) => {
-  const { book_name, author_name, new_author_name, date_read, rating, cover_url, review } = req.body;
+  const { book_name, author_name, new_author_name, date_read, rating, review } = req.body;
+
   const submittedAuthorName = author_name === '__new__' ? new_author_name : author_name;
   const normalizedAuthorName = submittedAuthorName?.trim();
+
+  const normalizedBookName = book_name?.trim();
 
   if (!normalizedAuthorName) {
     return res.status(400).send('Author name is required');
   }
 
-  try {
-    await db.query("BEGIN");
+  const response = await axios.get(`${process.env.BOOK_SEARCH_URL}?title=${encodeURIComponent(normalizedBookName)}&author=${encodeURIComponent(submittedAuthorName)}&limit=1`);
 
-    const existingAuthor = await db.query(
-      "SELECT author_id FROM authors WHERE LOWER(author_name) = LOWER($1) LIMIT 1",
-      [normalizedAuthorName]
-    );
-
-    let resolvedAuthorId = existingAuthor.rows[0]?.author_id;
-
-    if (!resolvedAuthorId) {
-      const newAuthor = await db.query(
-        "INSERT INTO authors (author_name) VALUES ($1) RETURNING author_id",
-        [normalizedAuthorName]
-      );
-      resolvedAuthorId = newAuthor.rows[0].author_id;
-    }
-
-    await db.query(
-      "INSERT INTO books (book_name, author_id, date_read, rating, cover_url, review) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-      [book_name, resolvedAuthorId, date_read, rating, cover_url || null, review || null]
-    );
-
-    await db.query("COMMIT");
-    res.redirect('/');
-  } catch (err) {
-    await db.query("ROLLBACK");
-    console.error('Error adding book:', err.stack);
-    res.status(500).send('Error adding book');
+  if (!response.data.docs.length) {
+    return res.status(404).json({ error: "Book not found" });
   }
+
+  let authorKey = response.data.docs[0].author_key ? response.data.docs[0].author_key[0] : null;
+  console.log('Author key:', authorKey);
+
+  if (response.data.docs[0].isbn && response.data.docs[0].isbn.length > 0) {
+    coverUrl = `https://covers.openlibrary.org/b/isbn/${response.data.docs[0].isbn[0]}-L.jpg`;
+  } else if (response.data.docs[0].cover_i) {
+    coverUrl = `https://covers.openlibrary.org/b/id/${response.data.docs[0].cover_i}-L.jpg`;
+  }
+
+  let newAuthorId;
+
+  try {
+    if(await db.query("SELECT ol_author_key FROM book_authors WHERE ol_author_key = $1", [authorKey]).then(result => result.rowCount > 0)) {
+      const existingAuthorResult = await db.query("SELECT author_id FROM book_authors WHERE ol_author_key = $1", [authorKey]);
+      newAuthorId = existingAuthorResult.rows[0].author_id;
+    } else {
+      const insertAuthorResult = await db.query("INSERT INTO book_authors (author_name, ol_author_key) VALUES ($1, $2) RETURNING author_id", [normalizedAuthorName, authorKey]);
+      newAuthorId = insertAuthorResult.rows[0].author_id;
+    }
+  } catch (err) {
+    console.error('Error inserting author:', err.stack);
+    return res.status(500).send('Error adding author');
+  }
+
+  try {
+    const exisitingBooks = await db.query("SELECT book_name FROM books");
+    if(exisitingBooks.rows.find(b => b.book_name.toLowerCase() === normalizedBookName.toLowerCase())) {
+      console.log('Book already exists, skipping insertion');
+    } else {
+      await db.query(
+        "INSERT INTO books (book_name, author_id, date_read, rating, cover_url, review) VALUES ($1, $2, $3, $4, $5, $6)",
+        [normalizedBookName, newAuthorId, date_read || null, rating || null, coverUrl || null, review || null]
+      );
+    }
+  } catch (err) {
+    console.error('Error inserting book:', err.stack);
+    return res.status(500).send('Error adding book');
+  }
+  
+  res.redirect('/');
 });
 
 
 app.post('/search', async (req, res) => {
   const searchBook = req.body.search_book.trim();
+  const authorBook = req.body.search_author.trim();
   console.log(`Searching for book: ${searchBook}`);
-  const result = await axios.get(process.env.BOOK_SEARCH_URL + `?title=${searchBook}`)
-  console.log('Search result:', result.data);
+  const result = await axios.get(process.env.BOOK_SEARCH_URL + `?q=${searchBook}&field=key`)
+  console.log('Search result:', result.data.key);
 });
 
 
