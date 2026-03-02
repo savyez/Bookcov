@@ -100,10 +100,10 @@
     <div class="container my-5 book">
       <div class="row">
         <img src="<%= book.cover_url %>" alt="<%= book.book_name %> cover" class="col-md-4">
-        <a href="#" class="book-title-link"><h2 class="book-title"><%= book.book_name %> - by <%= authors.find(a => a.author_id === book.author_id)?.author_name || 'Unknown Author' %></h2></a>
+        <a href="/book/<%= book.book_id %>" class="book-title-link" ><h2 class="book-title"><%= book.book_name %> - by <%= authors.find(a => a.author_id === book.author_id)?.author_name || 'Unknown Author' %></h2></a>
         <small>date read: <%= book.date_read.toDateString() %> | How Strongly do I recommend: <%= book.rating %>/10</small>
         </br>
-        <p class="col-md-8"><%= book.review %></p>
+        <p class="col-md-8"><%= book.shortnote %></p>
       </div>
     </div>
   <% }); %>

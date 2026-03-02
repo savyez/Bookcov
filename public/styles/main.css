@@ -12,6 +12,10 @@ body {
     margin-bottom: 2.25rem;
 }
 
+.description {
+    white-space: pre-line;
+}
+
 img {
     float: left;
     width: 110px;
@@ -114,4 +118,11 @@ img {
     line-height: 1.35;
     text-align: center;
     margin: 0 0 0.45rem 0;
+}
+
+small {
+    color: #a5a5a5;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    font-variant: small-caps;
 }

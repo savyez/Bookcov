@@ -1,6 +1,13 @@
-<%- include('/partials/header') %>
+<%- include('./partials/header') %>
 <body>
-    <div class="container">
-        <h1>you searched for book by author</h1>
+    <div class="container my-5">
+        <img class="book-cover" src="<%= book.cover_url %>" alt="Book Cover" srcset="">
+        <h1><%= bookName %> by - <%= authorName %></h1>
+        <small>Read on: <%= book.date_read.toDateString() %></small>
+        <br>
+        <small>How strongly do I recommend it: <%= book.rating %>/10</small>
+        <p><%= book.shortnote %></p>
+        <hr>
+        <p class="description"><%= book.description %></p>
     </div>
 </body>

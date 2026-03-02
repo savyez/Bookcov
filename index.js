@@ -85,10 +85,37 @@ app.get('/sort', async (req, res) => {
 });
 
 
+// book details route
+app.get('/book/:book_id', async (req, res) => {
+  const bookId = req.params.book_id;
+  try {
+    const bookResult = await db.query("SELECT * FROM books WHERE book_id = $1", [bookId]);
+    if (bookResult.rowCount === 0) {
+      return res.status(404).send('Book not found');
+    }
+    const book = bookResult.rows[0];
+    const authorResult = await db.query("SELECT * FROM books JOIN book_authors ON books.author_id = book_authors.author_id WHERE book_id = $1", [bookId]);
+    const authorName = authorResult.rows[0].author_name;
+    const bookName = authorResult.rows[0].book_name;
+
+    console.log(`Book name for book_id ${bookId}:`, bookName);
+    console.log(`Author name for book_id ${bookId}:`, authorName);
+    
+    res.render('book.ejs', {
+      book: book,
+      authorName: authorName,
+      bookName: bookName
+    });
+  } catch (err) {
+    console.error('Error fetching book details:', err.stack);
+    res.status(500).send('Error fetching book details');
+  }
+})
+
 
 // Search route
 app.get('/search', (_req, res) => {
-  res.render('book.ejs');
+  res.render('search.ejs');
 });
 
 
@@ -148,7 +175,7 @@ app.post('/internal/dashboard/login', async (req, res) => {
 
 // Add new book route
 app.post('/internal/dashboard/new', async (req, res) => {
-  const { book_name, author_name, new_author_name, date_read, rating, review } = req.body;
+  const { book_name, author_name, new_author_name, date_read, rating, shortnote } = req.body;
 
   const submittedAuthorName = author_name === '__new__' ? new_author_name : author_name;
   const normalizedAuthorName = submittedAuthorName?.trim();
@@ -195,8 +222,8 @@ app.post('/internal/dashboard/new', async (req, res) => {
       console.log('Book already exists, skipping insertion');
     } else {
       await db.query(
-        "INSERT INTO books (book_name, author_id, date_read, rating, cover_url, review) VALUES ($1, $2, $3, $4, $5, $6)",
-        [normalizedBookName, newAuthorId, date_read || null, rating || null, coverUrl || null, review || null]
+        "INSERT INTO books (book_name, author_id, date_read, rating, cover_url, shortnote) VALUES ($1, $2, $3, $4, $5, $6)",
+        [normalizedBookName, newAuthorId, date_read || null, rating || null, coverUrl || null, shortnote || null]
       );
     }
   } catch (err) {
