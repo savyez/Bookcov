@@ -54,9 +54,26 @@ app.get('/', async (_req, res) => {
   });
 });
 
-app.get('/new', async (_req, res) => {
+
+// Search route
+app.get('/search', (_req, res) => {
+  res.render('book.ejs');
+});
+
+
+// Search book route
+app.post('/search', async (req, res) => {
+  const searchBook = req.body.search_book.trim();
+  const authorBook = req.body.search_author.trim();
+  console.log(`Searching for book: ${searchBook}`);
+  const result = await axios.get(process.env.BOOK_SEARCH_URL + `?q=${searchBook}&field=key`)
+  console.log('Search result:', result.data.key);
+});
+
+// New book form route
+app.get('/internal/dashboard/new', async (_req, res) => {
   try {
-    const authorResult = await db.query("SELECT * FROM book_authors ORDER BY author_id");
+    const authorResult = await db.query("SELECT * FROM book_authors ORDER BY author_name ASC");
     res.render('new.ejs', {
       authors: authorResult.rows
     });
@@ -67,8 +84,17 @@ app.get('/new', async (_req, res) => {
 });
 
 
+app.get('/internal/dashboard', async (_req, res) => {
+  res.render('internal-dashboard.ejs');
+});
+
+app.get('/internal/dashboard/login', async (_req, res) => {
+  res.render('login.ejs');
+});
+
+
 // Add new book route
-app.post('/new', async (req, res) => {
+app.post('/internal/dashboard/new', async (req, res) => {
   const { book_name, author_name, new_author_name, date_read, rating, review } = req.body;
 
   const submittedAuthorName = author_name === '__new__' ? new_author_name : author_name;
@@ -129,17 +155,7 @@ app.post('/new', async (req, res) => {
 });
 
 
-app.post('/search', async (req, res) => {
-  const searchBook = req.body.search_book.trim();
-  const authorBook = req.body.search_author.trim();
-  console.log(`Searching for book: ${searchBook}`);
-  const result = await axios.get(process.env.BOOK_SEARCH_URL + `?q=${searchBook}&field=key`)
-  console.log('Search result:', result.data.key);
-});
-
-
-
 // Listen to the server
 app.listen(port, () => {
-    console.log(`Server is running on port https://127.0.0.1:${port}`);
+  console.log(`Server is running on port https://127.0.0.1:${port}`);
 });
