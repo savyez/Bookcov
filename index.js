@@ -208,6 +208,12 @@ app.post('/internal/dashboard/new', async (req, res) => {
 });
 
 
+app.post('/internal/dashboard/logout', async (_req, res) => {
+  isLoggedIn = false;
+  res.redirect('/internal/dashboard/login');
+});
+
+
 // Listen to the server
 app.listen(port, () => {
   console.log(`Server is running on port https://127.0.0.1:${port}`);

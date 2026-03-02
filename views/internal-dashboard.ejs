@@ -2,7 +2,13 @@
 <body>
     <div class="container">
         <h1>Internal Dashboard</h1>
-        <p>Welcome to the internal dashboard. Here you can manage your books and authors.</p>
+        <p>Welcome to the internal dashboard. Here you can manage your books and add new ones.</p>
+        <a href="/internal/dashboard/new" class="btn btn-primary">Add New Book</a>
+        <a href="/internal/dashboard/books" class="btn btn-secondary">Manage Books</a>
+        <a href="/internal/dashboard/authors" class="btn btn-secondary">Manage Authors</a>
+        <form action="/internal/dashboard/logout" method="post" style="display:inline;">
+          <button type="submit" class="btn btn-danger">Logout</button>
+        </form>
     </div>
 
 </body>
