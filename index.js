@@ -55,6 +55,32 @@ app.get('/', async (_req, res) => {
 });
 
 
+app.get('/sort', async (req, res) => {
+  const sort = (req.query.by || 'title').toString().toLowerCase();
+  const order = req.query.order === 'desc' ? 'DESC' : 'ASC';
+
+  let orderBy = 'book_name';
+  if (sort === 'rating') {
+    orderBy = 'rating';
+  }
+
+  try {
+    const authorResult = await db.query("SELECT * FROM book_authors");
+    const bookResult = await db.query(`SELECT * FROM books ORDER BY ${orderBy} ${order}`);
+    authors = authorResult.rows;
+    books = bookResult.rows;
+  } catch (err) {
+    console.error('Error fetching data from database:', err.stack);
+  }
+
+  res.render('index.ejs', {
+    authors: authors,
+    books: books,
+  });
+});
+
+
+
 // Search route
 app.get('/search', (_req, res) => {
   res.render('book.ejs');
