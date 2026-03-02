@@ -1,7 +1,21 @@
 <%- include('./partials/header.ejs')  %>
 
-<body>
-    <div>
-        <h1>This is your login page</h1>
-    </div>
+<body class="login-page">
+    <main class="login-shell"> 
+        <form class="login-form" autocomplete="off" method="post" action="/internal/dashboard/login"> 
+            <h2 class="login-title">Welcome back Admin, Login to access your Dashboard</h2>
+            <div class="form-floating"> 
+                <input type="text" autocomplete="off" class="form-control" id="floatingInput" name="username" placeholder="username" required> <label for="floatingInput">Username</label> 
+            </div> 
+            <div class="form-floating"> 
+                <input type="password" autocomplete="new-password" class="form-control" id="floatingPassword" name="password" placeholder="Password" required> 
+                <label for="floatingPassword">Password</label> 
+            </div> 
+            <div class="form-check text-start my-3"> 
+                <input class="form-check-input" type="checkbox" value="remember-me" id="checkDefault"> 
+                <label class="form-check-label" for="checkDefault">Remember me</label> 
+            </div> 
+            <button class="btn btn-primary w-100 py-2" type="submit">Log in</button> 
+        </form> 
+    </main>
 </body>

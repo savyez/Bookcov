@@ -77,7 +77,6 @@ img {
     font-size: 1.15rem;
 }
 
-
 .books-divider {
     border: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.877);
@@ -88,4 +87,31 @@ img {
 .books-divider-wrap {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
+}
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-shell {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.login-form {
+    width: min(420px, 92vw);
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.login-title {
+    font-size: 1.5rem;
+    line-height: 1.35;
+    text-align: center;
+    margin: 0 0 0.45rem 0;
 }

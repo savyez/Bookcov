@@ -6,10 +6,13 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({path: '.env'});
+dotenv.config({
+  path: '.env'
+});
 
 const app = express();
 const port = process.env.APP_PORT;
@@ -36,6 +39,8 @@ let authors = [];
 let books = [];
 
 let coverUrl = '';
+
+let isLoggedIn = false;
 
 
 // Home Route
@@ -96,6 +101,8 @@ app.post('/search', async (req, res) => {
   console.log('Search result:', result.data.key);
 });
 
+
+
 // New book form route
 app.get('/internal/dashboard/new', async (_req, res) => {
   try {
@@ -110,12 +117,32 @@ app.get('/internal/dashboard/new', async (_req, res) => {
 });
 
 
+
+// Internal dashboard route
 app.get('/internal/dashboard', async (_req, res) => {
+  if (!isLoggedIn) {
+    return res.redirect('/internal/dashboard/login');
+  }
   res.render('internal-dashboard.ejs');
 });
 
+
+
+// Login form route
 app.get('/internal/dashboard/login', async (_req, res) => {
   res.render('login.ejs');
+});
+
+
+// Login route
+app.post('/internal/dashboard/login', async (req, res) => {
+  const { username, password } = req.body;
+  if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
+    isLoggedIn = true;
+    res.redirect('/internal/dashboard');
+  } else {
+    res.status(401).send('Invalid credentials');
+  }
 });
 
 
