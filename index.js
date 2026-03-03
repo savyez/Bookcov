@@ -43,6 +43,27 @@ let coverUrl = '';
 let isLoggedIn = false;
 
 
+// Utility function to clean up book descriptions by removing markdown links and extra whitespace
+function cleanDescription(text) {
+  return text
+    .replace(/\[[^\]]*\]\[\d+\]/g, "")     // Remove markdown reference-style links like [text][1]
+
+    .replace(/\[\d+\]:\s*https?:\/\/\S+/g, "")     // Remove reference definitions like [1]: https://...
+
+    .replace(/\(\s*\)/g, "")     // Remove empty parentheses left behind
+
+    .replace(/See also:[\s\S]*/i, "")     // Remove "See also:" section entirely
+
+    .replace(/-{5,}/g, "")    // Remove horizontal separators
+
+    .replace(/^\s*-\s*$/gm, "")    // Remove stray bullet lines
+
+    .replace(/\n\s*\n/g, "\n\n")    // Clean excessive blank lines
+
+    .trim();
+}
+
+
 // Home Route
 app.get('/', async (_req, res) => {
   try {
@@ -97,9 +118,6 @@ app.get('/book/:book_id', async (req, res) => {
     const authorResult = await db.query("SELECT * FROM books JOIN book_authors ON books.author_id = book_authors.author_id WHERE book_id = $1", [bookId]);
     const authorName = authorResult.rows[0].author_name;
     const bookName = authorResult.rows[0].book_name;
-
-    console.log(`Book name for book_id ${bookId}:`, bookName);
-    console.log(`Author name for book_id ${bookId}:`, authorName);
     
     res.render('book.ejs', {
       book: book,
@@ -123,9 +141,44 @@ app.get('/search', (_req, res) => {
 app.post('/search', async (req, res) => {
   const searchBook = req.body.search_book.trim();
   const authorBook = req.body.search_author.trim();
-  console.log(`Searching for book: ${searchBook}`);
-  const result = await axios.get(process.env.BOOK_SEARCH_URL + `?q=${searchBook}&field=key`)
-  console.log('Search result:', result.data.key);
+
+  const searchResponse = await axios.get(process.env.BOOK_SEARCH_URL + `?title=${encodeURIComponent(searchBook)}&author=${encodeURIComponent(authorBook)}&limit=1`);
+  const searchResult = searchResponse.data.docs;
+
+  if (searchResult.length === 0) {
+    return res.status(404).send('No results found');
+  } else {
+    const book = searchResult[0];
+    const bookTitle = book.title || 'Unknown Title';
+    const authorName = book.author_name ? book.author_name[0] : 'Unknown Author';
+    const coverId = book.cover_i;
+    const coverUrl = coverId ? `https://covers.openlibrary.org/b/id/${coverId}-L.jpg` : null;
+    const readingUrl = `https://openlibrary.org${book.key}`;
+
+    const description = await axios.get(readingUrl+ '.json')
+      .then(response => response.data.description)
+      .catch(err => {
+        console.error('Error fetching book description:', err.stack);
+        return 'No description available';
+      });
+
+      const bookDescription =
+        typeof description === 'string'
+          ? cleanDescription(description)
+          : (typeof description?.value === 'string'
+              ? cleanDescription(description.value)
+              : 'No description available');
+
+    res.render('search.ejs', {
+      searchBook: searchBook,
+      searchAuthor: authorBook,
+      bookTitle: bookTitle,
+      authorName: authorName,
+      coverUrl: coverUrl,
+      readingUrl: readingUrl,
+      bookDescription: bookDescription,
+    });
+  }
 });
 
 

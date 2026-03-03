@@ -1,6 +1,20 @@
-<%- include('/partials/header') %>
+<%- include('./partials/header') %>
 <body>
-    <div class="container">
-        <h1>you searched for book by author</h1>
+    <div class="container my-5">
+        <h1><%= bookTitle %></h1>
+
+        <% if (coverUrl) { %>
+            <img src="<%= coverUrl %>" alt="Book Cover">
+            <% } %>
+
+            <p>Author: <%= authorName %></p>
+
+            <p class="description"><%= bookDescription %></p>
+
+        <% if (readingUrl) { %>
+            <p>Discover More about this book <a href="<%= readingUrl %>" target="_blank">here</a></p>
+        <% } %>
+
+            <button class="btn btn-primary"><a href="/">Home</a></button>
     </div>
 </body>
