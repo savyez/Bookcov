@@ -104,7 +104,7 @@
         <a href="/book/<%= book.book_id %>" class="book-title-link" ><h2 class="book-title"><%= book.book_name %> - by <%= authors.find(a => a.author_id === book.author_id)?.author_name || 'Unknown Author' %></h2></a>
         <small>date read: <%= book.date_read.toDateString() %> | How Strongly do I recommend: <%= book.rating %>/10</small>
         </br>
-        <p class="col-md-8"><%= book.shortnote %></p>
+        <p class="col-md-8 description"><%= book.shortnote %></p>
       </div>
     </div>
   <% }); %>

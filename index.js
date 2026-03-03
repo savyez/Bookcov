@@ -182,7 +182,7 @@ app.post('/search', async (req, res) => {
 });
 
 
-/*------------------------------------------------------------*/
+/*----------------------------------------ADMIN SECTION---------------------------------------------*/
 
 
 // New book form route
@@ -228,7 +228,7 @@ app.post('/internal/dashboard/login', async (req, res) => {
 
 // Add new book route
 app.post('/internal/dashboard/new', async (req, res) => {
-  const { book_name, author_name, new_author_name, date_read, rating, shortnote } = req.body;
+  const { book_name, author_name, new_author_name, date_read, rating, shortnote, description } = req.body;
 
   const submittedAuthorName = author_name === '__new__' ? new_author_name : author_name;
   const normalizedAuthorName = submittedAuthorName?.trim();
@@ -246,7 +246,6 @@ app.post('/internal/dashboard/new', async (req, res) => {
   }
 
   let authorKey = response.data.docs[0].author_key ? response.data.docs[0].author_key[0] : null;
-  console.log('Author key:', authorKey);
 
   if (response.data.docs[0].isbn && response.data.docs[0].isbn.length > 0) {
     coverUrl = `https://covers.openlibrary.org/b/isbn/${response.data.docs[0].isbn[0]}-L.jpg`;
@@ -275,8 +274,8 @@ app.post('/internal/dashboard/new', async (req, res) => {
       console.log('Book already exists, skipping insertion');
     } else {
       await db.query(
-        "INSERT INTO books (book_name, author_id, date_read, rating, cover_url, shortnote) VALUES ($1, $2, $3, $4, $5, $6)",
-        [normalizedBookName, newAuthorId, date_read || null, rating || null, coverUrl || null, shortnote || null]
+        "INSERT INTO books (book_name, author_id, date_read, rating, cover_url, shortnote, description) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+        [normalizedBookName, newAuthorId, date_read || null, rating || null, coverUrl || null, shortnote || null, description || null]
       );
     }
   } catch (err) {
@@ -305,9 +304,56 @@ app.get('/internal/dashboard/manage', async (_req, res) => {
   }
 });
 
+app.get('/internal/dashboard/edit/:book_id', async (req, res) => {
+  if (!isLoggedIn) {
+    return res.redirect('/internal/dashboard/login');
+  }
+
+  const book_id = parseInt(req.params.book_id, 10);
+  if (!Number.isInteger(book_id)) {
+    return res.status(400).send('Invalid book id');
+  }
+
+  try {
+    const bookResult = await db.query('SELECT * FROM books WHERE book_id = $1', [book_id]);
+    if (bookResult.rowCount === 0) {
+      return res.status(404).send('Book not found');
+    }
+
+    const authorResult = await db.query('SELECT * FROM book_authors ORDER BY author_name ASC');
+    return res.render('edit.ejs', {
+      book: bookResult.rows[0],
+      authors: authorResult.rows
+    });
+  } catch (err) {
+    console.error('Error loading edit form:', err.stack);
+    return res.status(500).send('Error loading edit form');
+  }
+});
+
 app.post('/internal/dashboard/edit/:book_id', async (req, res) => {
-  const book_id = req.params.book_id;
-  const { book_name, author_id, date_read, rating, shortnote } = req.body;
+  const book_id = parseInt(req.params.book_id, 10);
+  const { book_name, author_id, date_read, rating, shortnote, description } = req.body;
+  const trimmedBookName = (book_name || '').trim();
+
+  if (!Number.isInteger(book_id)) {
+    return res.status(400).send('Invalid book id');
+  }
+
+  if (!trimmedBookName) {
+    return res.status(400).send('Book name cannot be empty');
+  }
+
+  try {
+    await db.query(
+      "UPDATE books SET book_name = $1, author_id = $2, date_read = $3, rating = $4, shortnote = $5, description = $6 WHERE book_id = $7",
+      [trimmedBookName, author_id, date_read || null, rating || null, shortnote || null, description || null, book_id]
+    );
+    res.redirect('/internal/dashboard/manage');
+  } catch (err) {
+    console.error('Error updating book:', err.stack);
+    res.status(500).send('Error updating book');
+  }
 });
 
 app.post('/internal/dashboard/delete/:book_id', async (req, res) => {
