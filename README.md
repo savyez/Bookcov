@@ -117,6 +117,35 @@ http://127.0.0.1:3000
 
 ![BOOKCOV Database Schema](./db-schema.png)
 
+## Screenshots
+
+Add project screenshots to `./screenshots/` using these file names:
+
+- `home.png`
+- `search-result.png`
+- `admin-dashboard.png`
+- `manage-books.png`
+- `edit-book.png`
+- `delete-modal.png`
+
+### Home
+![Home](./screenshots/homepage.png)
+
+### Search Result
+![Search Result](./screenshots/search-book.png)
+
+### Admin Dashboard
+![Admin Dashboard](./screenshots/admin-dashboard.png)
+
+### Manage Books
+![Manage Books](./screenshots/manage-book.png)
+
+### Edit Book
+![Edit Book](./screenshots/edit-book.png)
+
+### Delete Confirmation Modal
+![Delete Confirmation Modal](./screenshots/delete-book.png)
+
 ## Notes
 
 - Admin auth currently uses an in-memory boolean (`isLoggedIn`) and is not session-based.
