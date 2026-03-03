@@ -1,25 +1,42 @@
 # BOOKCOV
 
-BOOKCOV is a Node.js + Express + EJS app to track books you read, discover new books from Open Library, and manage entries from an internal admin dashboard.
+BOOKCOV is a personal book-tracking web app built with Node.js, Express, EJS, and PostgreSQL.  
+It lets you browse and sort your collection, search books via Open Library, and manage entries from an admin dashboard.
+
+## Repo Description
+
+Personal book collection manager with Open Library integration, admin dashboard, and PostgreSQL-backed CRUD.
+
+## What This Project Does
+
+- Displays your book collection on the home page
+- Supports sorting by title and rating
+- Shows detailed book pages
+- Searches Open Library for book info
+- Provides admin-only dashboard pages to:
+- add books
+- manage books
+- edit books
+- delete books (with modal confirmation)
 
 ## Tech Stack
 
 - Node.js (ES Modules)
 - Express 5
-- EJS
+- EJS templating
 - PostgreSQL (`pg`)
 - Axios
 - dotenv
 - body-parser
+- Bootstrap (UI)
 
-## Features
+## Project Structure
 
-- Browse all books on the home page (`/`)
-- Sort books by title or rating (`/sort`)
-- View book details (`/book/:book_id`)
-- Search books using Open Library (`/search`)
-- Admin login and dashboard (`/internal/dashboard/*`)
-- Add books (and optionally new authors) to PostgreSQL
+- `index.js` - server entry point and all routes
+- `views/` - EJS templates (`index`, `book`, `search`, `login`, `internal-dashboard`, `new`, `manage`, `edit`)
+- `views/partials/` - shared header/footer
+- `public/` - static styles and image assets
+- `db-schema.png` - database schema diagram
 
 ## Prerequisites
 
@@ -51,19 +68,19 @@ ADMIN_PASSWORD=change_me
 npm install
 ```
 
-## Run
+## Run Locally
 
 ```bash
 node index.js
 ```
 
-For auto-reload during development:
+With nodemon:
 
 ```bash
 npx nodemon index.js
 ```
 
-App URL:
+Open in browser:
 
 ```text
 http://127.0.0.1:3000
@@ -71,37 +88,56 @@ http://127.0.0.1:3000
 
 ## Routes
 
-| Method | Route | Description |
+### Public
+
+| Method | Route | Purpose |
 | --- | --- | --- |
-| GET | `/` | Home page with books list |
-| GET | `/sort?by=title|rating&order=asc|desc` | Sorted books list |
-| GET | `/book/:book_id` | Book detail page |
-| GET | `/search` | Search form |
+| GET | `/` | Home page (books list) |
+| GET | `/sort?by=title\|rating&order=asc\|desc` | Sorted list |
+| GET | `/book/:book_id` | Single book details |
+| GET | `/search` | Search page |
 | POST | `/search` | Search Open Library and render result |
-| GET | `/internal/dashboard/login` | Admin login page |
-| POST | `/internal/dashboard/login` | Admin login submit |
-| GET | `/internal/dashboard` | Admin dashboard (requires login) |
-| GET | `/internal/dashboard/new` | New book form (requires login) |
-| POST | `/internal/dashboard/new` | Insert new book/author |
-| POST | `/internal/dashboard/logout` | Logout admin session |
 
-## Project Structure
+### Admin
 
-- `index.js` - Express app and routes
-- `views/` - EJS templates
-- `public/` - Static assets (CSS/images)
-- `db-schema.png` - Database schema diagram
-- `.env` - Local configuration
-
-## Notes
-
-- Login state is currently stored in a global variable (`isLoggedIn`), not in per-user sessions.
-- `coverUrl` is also a shared global variable; concurrent requests can overwrite it.
-- No test suite is currently configured.
+| Method | Route | Purpose |
+| --- | --- | --- |
+| GET | `/internal/dashboard/login` | Login form |
+| POST | `/internal/dashboard/login` | Login submit |
+| GET | `/internal/dashboard` | Dashboard home |
+| GET | `/internal/dashboard/new` | New book form |
+| POST | `/internal/dashboard/new` | Create book/author |
+| GET | `/internal/dashboard/manage` | Manage list |
+| GET | `/internal/dashboard/edit/:book_id` | Edit form |
+| POST | `/internal/dashboard/edit/:book_id` | Update book |
+| POST | `/internal/dashboard/delete/:book_id` | Delete book |
+| GET | `/internal/dashboard/logout` | Logout |
 
 ## Database Schema
 
 ![BOOKCOV Database Schema](./db-schema.png)
+
+## Notes
+
+- Admin auth currently uses an in-memory boolean (`isLoggedIn`) and is not session-based.
+- `coverUrl` is a shared variable in server memory and could be overwritten by concurrent requests.
+- No automated tests are configured yet.
+
+## Future Improvements
+
+- Replace `isLoggedIn` with session-based auth (`express-session`) and secure cookies.
+- Add role-based access control and route-level authorization middleware.
+- Add input validation/sanitization with `zod` or `express-validator`.
+- Add CSRF protection for admin POST routes.
+- Refactor shared mutable globals (`authors`, `books`, `coverUrl`) into request-scoped logic.
+- Add pagination on `/` and `/internal/dashboard/manage` for large datasets.
+- Add filtering/search on manage page (title, author, rating, date).
+- Improve error UX with user-friendly error pages and flash messages.
+- Add unit/integration tests (route tests + DB integration tests).
+- Add npm scripts (`start`, `dev`, `test`) and a lint/format setup.
+- Add migrations (for example with `node-pg-migrate`) instead of manual schema changes.
+- Add Docker support (`Dockerfile` + `docker-compose`) for app + Postgres.
+- Add logging and monitoring (`pino`, request IDs, healthcheck endpoint).
 
 ## Repository
 

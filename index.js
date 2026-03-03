@@ -367,7 +367,7 @@ app.post('/internal/dashboard/delete/:book_id', async (req, res) => {
   }
 });
 
-app.post('/internal/dashboard/logout', async (_req, res) => {
+app.get('/internal/dashboard/logout', async (_req, res) => {
   isLoggedIn = false;
   res.redirect('/internal/dashboard/login');
 });
