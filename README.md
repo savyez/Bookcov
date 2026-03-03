@@ -1,26 +1,31 @@
 # BOOKCOV
 
-BOOKCOV is an Express + EJS backend project for tracking books you have read, are reading, and want to read.
+BOOKCOV is a Node.js + Express + EJS app to track books you read, discover new books from Open Library, and manage entries from an internal admin dashboard.
 
 ## Tech Stack
 
 - Node.js (ES Modules)
 - Express 5
-- EJS templates
-- PostgreSQL driver (`pg`)
-- `dotenv` for environment config
-- `body-parser`
-- `axios`
+- EJS
+- PostgreSQL (`pg`)
+- Axios
+- dotenv
+- body-parser
 
-## Database Schema
+## Features
 
-![BOOKCOV Database Schema](./db-schema.png)
+- Browse all books on the home page (`/`)
+- Sort books by title or rating (`/sort`)
+- View book details (`/book/:book_id`)
+- Search books using Open Library (`/search`)
+- Admin login and dashboard (`/internal/dashboard/*`)
+- Add books (and optionally new authors) to PostgreSQL
 
 ## Prerequisites
 
 - Node.js 18+
 - npm
-- PostgreSQL 14+ (for database integration)
+- PostgreSQL 14+
 
 ## Environment Variables
 
@@ -32,51 +37,71 @@ APP_PORT=3000
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
-DB_PASSWORD=your_password_here
+DB_PASSWORD=your_password
 DB_NAME=bookcov
+
+BOOK_SEARCH_URL=https://openlibrary.org/search.json
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=change_me
 ```
 
-## Install
+## Installation
 
 ```bash
 npm install
 ```
 
-## Run Locally
-
-Start with Node:
+## Run
 
 ```bash
 node index.js
 ```
 
-Or start with Nodemon:
+For auto-reload during development:
 
 ```bash
 npx nodemon index.js
 ```
 
-Open:
+App URL:
 
 ```text
 http://127.0.0.1:3000
 ```
 
-## Current Routes
+## Routes
 
-- `GET /` renders the books list page.
-
-## Current App Behavior
-
-- The home page renders data from in-memory arrays in `index.js` (`authors` and `books`).
-- PostgreSQL env variables are configured, but database queries are not wired in yet.
+| Method | Route | Description |
+| --- | --- | --- |
+| GET | `/` | Home page with books list |
+| GET | `/sort?by=title|rating&order=asc|desc` | Sorted books list |
+| GET | `/book/:book_id` | Book detail page |
+| GET | `/search` | Search form |
+| POST | `/search` | Search Open Library and render result |
+| GET | `/internal/dashboard/login` | Admin login page |
+| POST | `/internal/dashboard/login` | Admin login submit |
+| GET | `/internal/dashboard` | Admin dashboard (requires login) |
+| GET | `/internal/dashboard/new` | New book form (requires login) |
+| POST | `/internal/dashboard/new` | Insert new book/author |
+| POST | `/internal/dashboard/logout` | Logout admin session |
 
 ## Project Structure
 
-- `index.js` - Express app entry point
+- `index.js` - Express app and routes
 - `views/` - EJS templates
+- `public/` - Static assets (CSS/images)
 - `db-schema.png` - Database schema diagram
-- `.env` - Local environment variables (do not commit secrets)
+- `.env` - Local configuration
+
+## Notes
+
+- Login state is currently stored in a global variable (`isLoggedIn`), not in per-user sessions.
+- `coverUrl` is also a shared global variable; concurrent requests can overwrite it.
+- No test suite is currently configured.
+
+## Database Schema
+
+![BOOKCOV Database Schema](./db-schema.png)
 
 ## Repository
 
