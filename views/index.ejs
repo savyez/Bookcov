@@ -91,14 +91,14 @@
     <hr class="books-divider">
   </div>
 <% if (books.length ===0) {%>
-  <div class="container my-5">
+  <div class="container my-5 book border p-4 rounded">
     <div class="row">
       <h3 class="text-center">No books found. Please add some books to your collection.</h3>
     </div>
   </div>
 <% } else { %>
   <% books.forEach((book) => { %>
-    <div class="container my-5 book">
+    <div class="container my-5 book border p-4 rounded">
       <div class="row">
         <img src="<%= book.cover_url %>" alt="<%= book.book_name %> cover" class="col-md-4">
         <a href="/book/<%= book.book_id %>" class="book-title-link" ><h2 class="book-title"><%= book.book_name %> - by <%= authors.find(a => a.author_id === book.author_id)?.author_name || 'Unknown Author' %></h2></a>

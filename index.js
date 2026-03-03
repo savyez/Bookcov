@@ -68,7 +68,7 @@ function cleanDescription(text) {
 app.get('/', async (_req, res) => {
   try {
     const authorResult = await db.query("SELECT * FROM book_authors");
-    const bookResult = await db.query("SELECT * FROM books");
+    const bookResult = await db.query("SELECT * FROM books ORDER BY date_read DESC");
     authors = authorResult.rows;
     books = bookResult.rows;
   } catch (err) {
@@ -182,6 +182,8 @@ app.post('/search', async (req, res) => {
 });
 
 
+/*------------------------------------------------------------*/
+
 
 // New book form route
 app.get('/internal/dashboard/new', async (_req, res) => {
@@ -197,7 +199,6 @@ app.get('/internal/dashboard/new', async (_req, res) => {
 });
 
 
-
 // Internal dashboard route
 app.get('/internal/dashboard', async (_req, res) => {
   if (!isLoggedIn) {
@@ -205,7 +206,6 @@ app.get('/internal/dashboard', async (_req, res) => {
   }
   res.render('internal-dashboard.ejs');
 });
-
 
 
 // Login form route
@@ -287,6 +287,39 @@ app.post('/internal/dashboard/new', async (req, res) => {
   res.redirect('/');
 });
 
+
+app.get('/internal/dashboard/manage', async (_req, res) => {
+  if (!isLoggedIn) {
+    return res.redirect('/internal/dashboard/login');
+  }
+  try {
+    const bookResult = await db.query("SELECT * FROM books ORDER BY date_read DESC");
+    const authorResult = await db.query("SELECT * FROM book_authors");
+    res.render('manage.ejs', {
+      books: bookResult.rows,
+      authors: authorResult.rows
+    });
+  } catch (err) {
+    console.error('Error fetching books or authors:', err.stack);
+    res.status(500).send('Error fetching data');
+  }
+});
+
+app.post('/internal/dashboard/edit/:book_id', async (req, res) => {
+  const book_id = req.params.book_id;
+  const { book_name, author_id, date_read, rating, shortnote } = req.body;
+});
+
+app.post('/internal/dashboard/delete/:book_id', async (req, res) => {
+  const book_id = parseInt(req.params.book_id);
+  try {
+    await db.query("DELETE FROM books WHERE book_id = $1", [book_id]);
+    res.redirect('/internal/dashboard/manage');
+  } catch (err) {
+    console.error('Error deleting book:', err.stack);
+    res.status(500).send('Error deleting book');
+  }
+});
 
 app.post('/internal/dashboard/logout', async (_req, res) => {
   isLoggedIn = false;

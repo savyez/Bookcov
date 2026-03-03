@@ -1,0 +1,47 @@
+<%- include('./partials/header.ejs') %>
+
+<% if (books.length ===0) {%>
+  <div class="container my-5">
+    <div class="row">
+      <h3 class="text-center">No books found. Please add some books to your collection.</h3>
+    </div>
+  </div>
+<% } else { %>
+  <% books.forEach((book) => { %>
+    <div class="container my-5 book border p-4 rounded">
+        <div class="row">
+            <img src="<%= book.cover_url %>" alt="<%= book.book_name %> cover" class="col-md-4">
+            <a href="/book/<%= book.book_id %>" class="book-title-link" ><h2 class="book-title"><%= book.book_name %> - by <%= authors.find(a => a.author_id === book.author_id)?.author_name || 'Unknown Author' %></h2></a>
+            <small>date read: <%= book.date_read.toDateString() %> | How Strongly do I recommend: <%= book.rating %>/10</small>
+            </br>
+            <p class="col-md-8"><%= book.shortnote %></p>
+        </div>
+        <div class="d-flex justify-content-between align-items-center my-3">
+            <form action="/internal/dashboard/edit/<%= book.book_id %>" method="POST" class="m-0">
+            <button type="submit" class="btn btn-primary" value="<%= book.book_id %>">Edit Book</button>
+            </form>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-<%= book.book_id %>"> Delete Book </button>
+        </div>
+        <div class="modal fade" id="deleteModal-<%= book.book_id %>" tabindex="-1" aria-labelledby="deleteModalLabel-<%= book.book_id %>" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-3 shadow">
+              <div class="modal-body p-4 text-center">
+                <h5 class="mb-2" id="deleteModalLabel-<%= book.book_id %>">Delete "<%= book.book_name %>"?</h5>
+                <p class="mb-0">This action cannot be undone.</p>
+              </div>
+              <div class="modal-footer flex-nowrap p-0">
+                <form action="/internal/dashboard/delete/<%= book.book_id %>" method="POST" class="col-6 m-0">
+                  <button type="submit" class="btn btn-lg btn-link fs-6 text-decoration-none w-100 py-3 m-0 rounded-0 border-end">
+                    <strong>Yes, delete</strong>
+                  </button>
+                </form>
+                <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 py-3 m-0 rounded-0" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+  <% }); %>
+<% } %>
+
+<%- include('./partials/footer.ejs') %>
